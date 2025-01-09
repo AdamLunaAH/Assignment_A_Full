@@ -37,10 +37,11 @@ public class OpenWeatherService
         if (_cachedCityForecasts.TryGetValue((City, System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName), out var cachedData))
         {
             // Check if the cache is still valid (less than 1 minute old)
+
             if ((DateTime.Now - cachedData.timestamp).TotalMinutes < 1)
             {
-                // Message that the forecast is from cache
-                OnWeatherForecastAvailable($"Weather forecast for {City} is available from cache.");
+                    // Message that the forecast is from cache
+                    OnWeatherForecastAvailable($"Weather forecast for {City} is available from cache.");
                 return cachedData.forecast;
             }
             else
@@ -62,6 +63,10 @@ public class OpenWeatherService
 
         // Cache the new data with the current timestamp
         _cachedCityForecasts[(City, language)] = (forecast, DateTime.Now);
+        /* Used for testing the cache expiration check (Removes 10 minutes from the cache timestamp to always make it to old).
+        This is faster than using a long pause between the Tasks */
+        //_cachedCityForecasts[(City, language)] = (forecast, DateTime.Now.AddMinutes(-10));
+
 
         // Message that the forecast is not from cache (from the OpenWeatherAPI server).
         OnWeatherForecastAvailable($"Weather forecast for {City} is available from server.");
@@ -105,6 +110,9 @@ public class OpenWeatherService
 
         // Cache the new data with the current timestamp
         _cachedGeoForecasts[(latitude, longitude, language)] = (forecast, DateTime.Now);
+        /* Used for testing the cache expiration check (Removes 10 minutes from the cache timestamp to always make it to old).
+        This is faster than using a long pause between the Tasks */
+        //_cachedGeoForecasts[(latitude, longitude, language)] = (forecast, DateTime.Now.AddMinutes(-10));
 
         // Message that the forecast is not from cache (from the OpenWeatherAPI server).
         OnWeatherForecastAvailable($"Weather forecast for coordinates ({latitude}, {longitude}) is available from server.");

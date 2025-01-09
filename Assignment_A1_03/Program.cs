@@ -39,6 +39,9 @@ class Program
 
             // Clear cache between tasks (for testing)
             //service.ClearCache();
+            // Pause used for testing the cache time check  
+            //await Task.Delay(100000);
+
 
             tasks[2] = service.GetForecastAsync(latitude, longitude);
             tasks[3] = service.GetForecastAsync(location);
