@@ -96,29 +96,37 @@ public class NewsService
     // Load the cache from the XML file
     private void LoadCacheFromXML()
     {
-        var cacheDirectory = Path.GetDirectoryName(NewsCacheKey.fname("dummy.xml"));
+        //var cacheDirectory = Path.GetDirectoryName(NewsCacheKey.fname("dummy.xml"));
 
+        // Get the cache directory from NewsCacheKey.cs
+        var cacheDirectory = NewsCacheKey.GetCacheDirectory();
+
+        // Check if the cache directory exists
         if (cacheDirectory == null || !Directory.Exists(cacheDirectory))
         {
             Console.WriteLine("Cache directory does not exist.");
             return;
         }
 
+        // Load the cache from each cache file
         foreach (var file in Directory.GetFiles(cacheDirectory, "Cache-*.xml"))
         {
             try
             {
+                // Get the file information
                 var fileInfo = new FileInfo(file);
 
                 // Attempt to parse the category from the filename
                 var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file);
                 var parts = fileNameWithoutExtension.Split('-');
+
+                // Check if the filename is in the correct format
                 if (parts.Length < 2)
                 {
                     Console.WriteLine($"Invalid cache file name format: {file}");
                     continue;
                 }
-
+                // Check if the category is valid
                 if (!Enum.TryParse(parts[1], out NewsCategory category))
                 {
                     Console.WriteLine($"Invalid category in cache file name: {file}");
@@ -127,6 +135,8 @@ public class NewsService
 
                 // Check if the cache is too old (e.g., older than 1 minute)
                 if ((DateTime.Now - fileInfo.LastWriteTime).TotalMinutes > 1)
+                // Changed to seconds for testing
+                //if ((DateTime.Now - fileInfo.LastWriteTime).TotalSeconds > 1)
                 {
                     // Shows the cache file is too old and will be deleted
                     Console.WriteLine($"Cache file for {category} is too old and will be deleted: {file}");
