@@ -15,18 +15,40 @@ class Program
 
         service.NewsAvailable += NewsHandler;
 
+        var categories = Enum.GetValues(typeof(NewsCategory)).Cast<NewsCategory>();
 
-        Task<NewsResponse>[] tasks = { null, null, null, null, null };
+        //var tasks = categories.Select(category => service.GetNewsAsync(category)).ToArray();
+        //Task<NewsResponse>[] tasks = { null, null, null, null, null };
 
         Exception exception = null;
 
+        var tasks = new List<Task<NewsResponse>>();
+
+        foreach (var category in categories)
+        {
+            try
+            {
+                tasks.Add(service.GetNewsAsync(category));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to create task for category {category}: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                }
+            }
+        }
+
+
+
         try
         {
-            tasks[0] = service.GetNewsAsync(NewsCategory.Sports);
-            tasks[1] = service.GetNewsAsync(NewsCategory.Technology);
-            tasks[2] = service.GetNewsAsync(NewsCategory.Business);
-            tasks[3] = service.GetNewsAsync(NewsCategory.Entertainment);
-            tasks[4] = service.GetNewsAsync(NewsCategory.World);
+            //tasks[0] = service.GetNewsAsync(NewsCategory.Sports);
+            //tasks[1] = service.GetNewsAsync(NewsCategory.Technology);
+            //tasks[2] = service.GetNewsAsync(NewsCategory.Business);
+            //tasks[3] = service.GetNewsAsync(NewsCategory.Entertainment);
+            //tasks[4] = service.GetNewsAsync(NewsCategory.World);
 
 
             await Task.WhenAll(tasks);
@@ -40,8 +62,6 @@ class Program
             {
                 Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
             }
-
-            
         }
 
         foreach (var task in tasks)
@@ -79,9 +99,9 @@ class Program
 
         }
     }
-    
 
-    static void NewsHandler(object sender,string message)
+
+    static void NewsHandler(object sender, string message)
     {
         Console.WriteLine($"News is available: {message}");
     }
@@ -89,18 +109,28 @@ class Program
 
     static void DisplayNews(NewsResponse news)
     {
+        //Console.WriteLine($"{news.Category} Headlines");
+        //foreach (var item in news.Articles)
+        //{
+        //    Console.WriteLine($"***********************\n" +
+        //        $"Title: {item.Title}\n" +
+        //        $"  Story: {item.Description}\n" +
+        //        $"  Publication: {item.Providers}\n" +
+        //        $"  Date: {item.DatePublished}\n" +
+        //        $"  URL: {item.Url}\n" +
+        //        $"  Image: {item.Image}");
+        //    Console.WriteLine("***********************\n\n");
+        //}
+        Console.WriteLine($"***********************");
+
         Console.WriteLine($"{news.Category} Headlines");
         foreach (var item in news.Articles)
-        {
-            Console.WriteLine($"***********************\n" +
-                $"Title: {item.Title}\n" +
-                $"  Story: {item.Description}\n" +
-                $"  Publication: {item.Providers}\n" +
-                $"  Date: {item.DatePublished}\n" +
-                $"  URL: {item.Url}\n" +
-                $"  Image: {item.Image}");
-            Console.WriteLine("***********************\n\n");
+        {  
+            Console.WriteLine($"    - {item.DatePublished}: {item.Title}"); 
         }
+
+        Console.WriteLine($"***********************\n");
+
     }
 }
 
