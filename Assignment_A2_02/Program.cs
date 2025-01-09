@@ -18,40 +18,60 @@ class Program
         var categories = Enum.GetValues(typeof(NewsCategory)).Cast<NewsCategory>();
 
         //var tasks = categories.Select(category => service.GetNewsAsync(category)).ToArray();
-        //Task<NewsResponse>[] tasks = { null, null, null, null, null };
+        Task<NewsResponse>[] tasks = { null, null, null, null, null, null, null, null, null, null };
 
         Exception exception = null;
 
-        var tasks = new List<Task<NewsResponse>>();
+        //var tasks = new List<Task<NewsResponse>>();
 
-        foreach (var category in categories)
-        {
-            try
-            {
-                tasks.Add(service.GetNewsAsync(category));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to create task for category {category}: {ex.Message}");
-                if (ex.InnerException != null)
-                {
-                    Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
-                }
-            }
-        }
+        //var tasksCache = new List<Task<NewsResponse>>();
+
+        //foreach (var category in categories)
+        //{
+        //    try
+        //    {
+        //        tasks.Add(service.GetNewsAsync(category));
+
+        //        //tasksCache.Add(service.GetNewsAsync(category));
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Failed to create task for category {category}: {ex.Message}");
+        //        if (ex.InnerException != null)
+        //        {
+        //            Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+        //        }
+        //    }
+        //}
 
 
 
         try
         {
-            //tasks[0] = service.GetNewsAsync(NewsCategory.Sports);
-            //tasks[1] = service.GetNewsAsync(NewsCategory.Technology);
-            //tasks[2] = service.GetNewsAsync(NewsCategory.Business);
-            //tasks[3] = service.GetNewsAsync(NewsCategory.Entertainment);
-            //tasks[4] = service.GetNewsAsync(NewsCategory.World);
+            tasks[0] = service.GetNewsAsync(NewsCategory.Sports);
+            tasks[1] = service.GetNewsAsync(NewsCategory.Technology);
+            tasks[2] = service.GetNewsAsync(NewsCategory.Business);
+            tasks[3] = service.GetNewsAsync(NewsCategory.Entertainment);
+            tasks[4] = service.GetNewsAsync(NewsCategory.World);
 
+            await Task.WhenAll(tasks[0], tasks[1], tasks[2], tasks[3], tasks[4]);
+
+            
+            ////service.ClearCache();
+
+
+
+            tasks[5] = service.GetNewsAsync(NewsCategory.Sports);
+            tasks[6] = service.GetNewsAsync(NewsCategory.Technology);
+            tasks[7] = service.GetNewsAsync(NewsCategory.Business);
+            tasks[8] = service.GetNewsAsync(NewsCategory.Entertainment);
+            tasks[9] = service.GetNewsAsync(NewsCategory.World);
+
+            await Task.WhenAll(tasks[5], tasks[6], tasks[7], tasks[8], tasks[9]);
 
             await Task.WhenAll(tasks);
+
+            //await Task.WhenAll(tasksCache);
         }
         catch (Exception ex)
         {
@@ -63,6 +83,46 @@ class Program
                 Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
             }
         }
+
+
+
+        //foreach (var category in categories)
+        //{
+        //    try
+        //    {
+        //        tasksCache.Add(service.GetNewsAsync(category));
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Failed to create task for category {category}: {ex.Message}");
+        //        if (ex.InnerException != null)
+        //        {
+        //            Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+        //        }
+        //    }
+        //}
+
+
+
+        //try
+        //{
+        //    await Task.WhenAll(tasksCache);
+        //}
+        //catch (Exception ex)
+        //{
+        //    exception = ex;
+        //    //How to handle an exception
+        //    Console.WriteLine($"An error occured: {ex.Message}");
+        //    if (ex.InnerException != null)
+        //    {
+        //        Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+        //    }
+        //}
+
+
+
+
+
 
         foreach (var task in tasks)
         {

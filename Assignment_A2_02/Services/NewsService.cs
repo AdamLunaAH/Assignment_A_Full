@@ -13,6 +13,11 @@ public class NewsService
     readonly string _endpoint = "https://api.bing.microsoft.com/v7.0/news";
     readonly HttpClient _httpClient = new HttpClient();
 
+    //readonly ConcurrentDictionary<NewsCategory, (NewsResponse newsResponse, DateTime timestamp)> _cachedNews = new ConcurrentDictionary<NewsCategory, (NewsResponse, DateTime)>();
+
+    readonly ConcurrentDictionary<NewsCategory, (NewsResponse newsResponse, DateTime timestamp)> _cachedNews =
+        new ConcurrentDictionary<NewsCategory, (NewsResponse, DateTime)>();
+
 
     public NewsService()
     {
@@ -30,6 +35,36 @@ public class NewsService
     public async Task<NewsResponse> GetNewsAsync(NewsCategory category)
     {
 
+
+        //if (_cachedNews.TryGetValue((category), out var cachedData))
+        //{
+        //    if ((DateTime.Now - cachedData.timestamp).TotalMinutes < 1)
+        //    {
+        //        OnNewsAvailable($"News for {category} is available from cache.");
+        //        return cachedData.newsResponse;
+        //    }
+
+        //    else 
+        //    {
+        //        _cachedNews.TryRemove(category, out _);
+        //    }
+        //}
+
+
+        // Check if the news for the category is already cached
+        if (_cachedNews.TryGetValue(category, out var cachedData))
+        {
+            // If the cached data is less than 1 minute old, return it
+            if ((DateTime.Now - cachedData.timestamp).TotalMinutes < 1)
+            {
+                OnNewsAvailable($"News for {category} is available from cache.");
+                return cachedData.newsResponse;
+            }
+
+            // If the cached data is expired, remove it
+            _cachedNews.TryRemove(category, out _);
+        }
+
         //To ensure not too many requests per second for BingNewsApi free plan
         await Task.Delay(2000);
 
@@ -38,7 +73,7 @@ public class NewsService
         HttpResponseMessage response = await _httpClient.GetAsync(uri);
         response.EnsureSuccessStatusCode();
 
-        
+
         //Convert Json to NewsResponse
         string content = await response.Content.ReadAsStringAsync();
         var newsResponse = JsonConvert.DeserializeObject<NewsResponse>(content);
@@ -46,12 +81,21 @@ public class NewsService
 
         //NewsResponse newsResponse = await ReadWebApiAsync(category, uri); 
 
+        _cachedNews[category] = (newsResponse, DateTime.Now);
+
         OnNewsAvailable($"News for {category} is available.");
+
+
 
         return newsResponse;
     }
 
-
+    // Method to clear the cache (optional, for testing purposes)
+    public void ClearCache()
+    {
+        _cachedNews.Clear();
+        Console.WriteLine("Cache cleared.");
+    }
     //private async Task<NewsResponse> ReadWebApiAsync(NewsCategory c, string uri)
     //{
     //    HttpResponseMessage response = await _httpClient.GetAsync(uri);
@@ -62,7 +106,7 @@ public class NewsService
 
 
     //    var newsResponse = new NewsResponse(
-            
+
     //        Articles = newsResponseData.Articles.Select(article => new NewsArticle
     //        {
     //            Title = article.Title,
