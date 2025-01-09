@@ -34,10 +34,7 @@ public class NewsService
     public async Task<NewsResponse> GetNewsAsync(NewsCategory category)
     {
 
-
         // Check if the news for the category is in the cache
-
-
         if (_cachedNews.TryGetValue(category, out var cachedData))
         {
             // Check if the cache is still valid (less than 1 minute old)
@@ -47,7 +44,6 @@ public class NewsService
                 OnNewsAvailable($"News for {category} is available from cache.");
                 return cachedData.newsResponse;
             }
-
             // If the cache is expired, clear it and fetch new data
             _cachedNews.TryRemove(category, out _);
         }
@@ -82,14 +78,7 @@ public class NewsService
         return newsResponse;
     }
 
-    // Clear Cache (used for testing purposes)
-    public void ClearCache()
-    {
-        _cachedNews.Clear();
-        ClearCacheXML();
-        Console.WriteLine("Cache cleared.");
-    }
-
+    // Save the cache to an XML file
     private void SaveCacheToXML(NewsCategory category, NewsResponse newsResponse)
     {
         try
@@ -104,36 +93,69 @@ public class NewsService
         }
     }
 
+    // Load the cache from the XML file
     private void LoadCacheFromXML()
     {
+        var cacheDirectory = Path.GetDirectoryName(NewsCacheKey.fname("dummy.xml"));
 
-        foreach (var category in Enum.GetValues(typeof(NewsCategory)).Cast<NewsCategory>())
+        if (cacheDirectory == null || !Directory.Exists(cacheDirectory))
+        {
+            Console.WriteLine("Cache directory does not exist.");
+            return;
+        }
+
+        foreach (var file in Directory.GetFiles(cacheDirectory, "Cache-*.xml"))
         {
             try
             {
-                var key = new NewsCacheKey(category, DateTime.Now);
-                if (key.CacheExist)
+                var fileInfo = new FileInfo(file);
+
+                // Attempt to parse the category from the filename
+                var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file);
+                var parts = fileNameWithoutExtension.Split('-');
+                if (parts.Length < 2)
                 {
-                    
-
-                    // Check if the cache is too old (e.g., older than 1 minute)
-                    
-
-                    // Load the cache if it is valid
-                    var newsResponse = NewsResponse.Deserialize(key.FileName);
-                    _cachedNews[category] = (newsResponse, DateTime.Now);
-                    Console.WriteLine($"Loaded cache for {category} from: {key.FileName}");
+                    Console.WriteLine($"Invalid cache file name format: {file}");
+                    continue;
                 }
-                
+
+                if (!Enum.TryParse(parts[1], out NewsCategory category))
+                {
+                    Console.WriteLine($"Invalid category in cache file name: {file}");
+                    continue;
+                }
+
+                // Check if the cache is too old (e.g., older than 1 minute)
+                if ((DateTime.Now - fileInfo.LastWriteTime).TotalMinutes > 1)
+                {
+                    // Shows the cache file is too old and will be deleted
+                    Console.WriteLine($"Cache file for {category} is too old and will be deleted: {file}");
+                    File.Delete(file);
+                    continue;
+                }
+
+                // Load the cache if it is valid
+                var newsResponse = NewsResponse.Deserialize(file);
+                _cachedNews[category] = (newsResponse, fileInfo.LastWriteTime);
+                Console.WriteLine($"Loaded cache for {category} from: {file}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to load cache for {category}: {ex.Message}");
+                Console.WriteLine($"Failed to load cache file: {file}, Error: {ex.Message}");
             }
         }
-
     }
 
+
+    // Clear Cache (used for testing)
+    public void ClearCache()
+    {
+        _cachedNews.Clear();
+        ClearCacheXML();
+        Console.WriteLine("Cache cleared.");
+    }
+
+    // Clear the cache from the XML file (used for testing)
     private void ClearCacheXML()
     {
         foreach (var category in Enum.GetValues(typeof(NewsCategory)).Cast<NewsCategory>())

@@ -6,7 +6,7 @@ public class NewsCacheKey
     readonly string _timewindow;
 
     public string FileName => fname("Cache-" + Key + ".xml");
-    public string Key => _category.ToString() + _timewindow;
+    public string Key => _category.ToString() + "-" + _timewindow;
     public bool CacheExist => File.Exists(FileName);
 
     public NewsCacheKey (NewsCategory category, DateTime dt)
@@ -14,11 +14,22 @@ public class NewsCacheKey
         _category = category;
         _timewindow = DateTime.Now.ToString("yyyy-MM-dd-HH-mm");
     }
-    static string fname(string name)
+    public static string fname(string name)
     {
         var documentPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         documentPath = Path.Combine(documentPath, "ADOP", "ProjectB");
         if (!Directory.Exists(documentPath)) Directory.CreateDirectory(documentPath);
         return Path.Combine(documentPath, name);
     }
+
+    //public static string GetCacheDirectory()
+    //{
+    //    var documentPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+    //    documentPath = Path.Combine(documentPath, "ADOP", "ProjectB");
+    //    if (!Directory.Exists(documentPath)) Directory.CreateDirectory(documentPath);
+    //    return documentPath;
+    //}
+
+
+
 }

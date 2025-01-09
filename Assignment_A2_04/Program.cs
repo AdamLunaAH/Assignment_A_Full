@@ -54,6 +54,9 @@ class Program
 
             await Task.WhenAll(tasks);
 
+            // Clears the cache (used for testing)
+            //service.ClearCache();
+
         }
         catch (Exception ex)
         {
