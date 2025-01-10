@@ -7,6 +7,7 @@ class Program
 {
     static async Task Main(string[] args)
     {
+        // Create an instance of the OpenWeatherService
         OpenWeatherService service = new OpenWeatherService();
 
         //Register the event
@@ -18,37 +19,40 @@ class Program
         // Clear any existing cache (for testing)
         //service.ClearCache();
 
+        // Array to hold the tasks
         Task<Forecast>[] tasks = { null, null, null, null };
         Exception exception = null;
         try
         {
-            //double latitude = 59.5086798659495;
+            // Location in coordinates
             double latitude = 60.67452;
-            //double longitude = 18.2654625932976;
             double longitude = 17.14174;
 
+            // Location in name
             string location = "Borlänge";
 
-            //Create the two tasks and wait for comletion
+            // Create and start the two tasks 
             tasks[0] = service.GetForecastAsync(latitude, longitude);
             tasks[1] = service.GetForecastAsync(location);
 
-            //Task.WaitAll(tasks[0], tasks[1]);
+            // Wait for the tasks to complete
             await Task.WhenAll(tasks[0], tasks[1]);
-            //await Task.WhenAll(tasks[0], tasks[1]);
 
             // Clear cache between tasks (for testing)
             //service.ClearCache();
-            // Pause used for testing the cache time check  
+            // Pause used for testing the cache time check (the changed DateTime in OpenWeatherService is better to use for testing old data)  
             //await Task.Delay(100000);
 
-
+            // Create and start the two tasks
             tasks[2] = service.GetForecastAsync(latitude, longitude);
             tasks[3] = service.GetForecastAsync(location);
 
-            //Wait and confirm we get an event showing cahced data avaialable
+            // Wait for the tasks to complete, and use the cache for fetching the data
             await Task.WhenAll(tasks[2], tasks[3]);
-            //Task.WaitAll(tasks[2], tasks[3]);
+
+            Console.WriteLine("\nPress a button to show the weather data.\n");
+            Console.ReadKey();
+
         }
         catch (Exception ex)
         {
@@ -56,6 +60,7 @@ class Program
             //How to handle an exception
             //Your Code
 
+            // Log error messages to the console
             Console.WriteLine($"An error occured: {ex.Message}");
             if (ex.InnerException != null)
             {
@@ -63,6 +68,7 @@ class Program
             }
         }
 
+        // Loop through the tasks to check their status and display the forecast
         foreach (var task in tasks)
         {
             //How to deal with successful and fault tasks
@@ -74,11 +80,12 @@ class Program
                 continue;
             }
 
+            // Check the status of the task and display the forecast or error message
             switch (task.Status)
             {
                 // Successful task
                 case TaskStatus.RanToCompletion:
-                    Console.WriteLine("Task completed successfully");
+                    //Console.WriteLine("Task completed successfully");
                     // Runs the DisplayForecast method which displays the forecast
                     DisplayForecast(task.Result);
                     break;
@@ -99,14 +106,18 @@ class Program
                     Console.WriteLine($"Task is in an unexpected state: {task.Status}");
                     break;
             }
+
+            
+
         }
+
     }
 
 
     //Event handler declaration
     //Your Code
 
-    // Event handler for the WeatherForecastAvailable event
+    // Event handler for the WeatherForecastAvailable event and present a message if the forecast is available
     static void WeatherForecastHandler(object sender, string message)
     {
         // Message for if the forecast is available
@@ -119,7 +130,8 @@ class Program
         Console.WriteLine($"Weather forecast for {forecast.City}");
         foreach (var item in forecast.Items.GroupBy(x => x.DateTime.Date))
         {
-            Console.WriteLine($"***********************\n" +
+            Console.WriteLine($"***********************\n" 
+                + $"{forecast.City}\n" +
                 $"Date: {item.Key.ToShortDateString()}");
 
             foreach (var hour in item)
@@ -130,7 +142,7 @@ class Program
                     $"      Condition: {hour.Description}\n" +
                     $"      Icon: {hour.Icon}");
             }
-            Console.WriteLine("***********************\n\n");
+            Console.WriteLine("***********************\n");
         }
     }
 

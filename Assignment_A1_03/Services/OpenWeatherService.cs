@@ -8,25 +8,24 @@ namespace Assignment_A1_03.Services;
 public class OpenWeatherService
 {
     readonly HttpClient _httpClient = new HttpClient();
-    //readonly ConcurrentDictionary<(double, double, string), Forecast> _cachedGeoForecasts = new ConcurrentDictionary<(double, double, string), Forecast>();
-    //readonly ConcurrentDictionary<(string, string), Forecast> _cachedCityForecasts = new ConcurrentDictionary<(string, string), Forecast>();
 
+    // ConcurrentDictionaries to store the cached forecasts
     readonly ConcurrentDictionary<(double, double, string), (Forecast forecast, DateTime timestamp)> _cachedGeoForecasts = new ConcurrentDictionary<(double, double, string), (Forecast, DateTime)>();
     readonly ConcurrentDictionary<(string, string), (Forecast forecast, DateTime timestamp)> _cachedCityForecasts = new ConcurrentDictionary<(string, string), (Forecast, DateTime)>();
 
 
     // Your API Key
     readonly string apiKey = "d11de2c96e160e2d3350ad3db04c75bc";
-    //readonly string apiKey = "";
 
 
-    //Event declaration
+    // Event for when the forecast is available
     public event EventHandler<string> WeatherForecastAvailable;
     protected virtual void OnWeatherForecastAvailable (string message)
     {
         WeatherForecastAvailable?.Invoke(this, message);
     }
 
+    // Get the forecast for a city/location (by name)
     public async Task<Forecast> GetForecastAsync(string City)
     {
         //part of cache code here to check if forecast in Cache
@@ -37,7 +36,6 @@ public class OpenWeatherService
         if (_cachedCityForecasts.TryGetValue((City, System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName), out var cachedData))
         {
             // Check if the cache is still valid (less than 1 minute old)
-
             if ((DateTime.Now - cachedData.timestamp).TotalMinutes < 1)
             {
                     // Message that the forecast is from cache
@@ -46,11 +44,12 @@ public class OpenWeatherService
             }
             else
             {
-                // If the cache is expired, clear it and fetch new data
+                // If the cache is expired, clear it
                 _cachedCityForecasts.TryRemove((City, System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName), out _);
             }
         }
 
+        // Fetch new forecast from OpenWeatherAPI
         //https://openweathermap.org/current
         var language = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
         var uri = $"https://api.openweathermap.org/data/2.5/forecast?q={City}&units=metric&lang={language}&appid={apiKey}";
@@ -74,6 +73,8 @@ public class OpenWeatherService
         return forecast;
 
     }
+
+    // Get the forecast for a location (by coordinates)
     public async Task<Forecast> GetForecastAsync(double latitude, double longitude)
     {
         //part of cache code here to check if forecast in Cache
@@ -92,12 +93,12 @@ public class OpenWeatherService
             }
             else
             {
-                // If the cache is expired, clear it and fetch new data
+                // If the cache is expired, clear it
                 _cachedGeoForecasts.TryRemove((latitude, longitude, System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName), out _);
             }
         }
 
-
+        // Fetch new forecast from OpenWeatherAPI
         //https://openweathermap.org/current
         var language = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
         var uri = $"https://api.openweathermap.org/data/2.5/forecast?lat={latitude}&lon={longitude}&units=metric&lang={language}&appid={apiKey}";
@@ -119,6 +120,8 @@ public class OpenWeatherService
 
         return forecast;
     }
+
+    // Method to read the data from the API and convert it to the Forecast model
     private async Task<Forecast> ReadWebApiAsync(string uri)
     {
         HttpResponseMessage response = await _httpClient.GetAsync(uri);
@@ -147,17 +150,16 @@ public class OpenWeatherService
         return forecast;
     }
 
+    // Method to convert Unix timestamp to DateTime
     private DateTime UnixTimeStampToDateTime(double unixTimeStamp) => DateTime.UnixEpoch.AddSeconds(unixTimeStamp).ToLocalTime();
 
-    // Clear Cache (used for testing purposes)
+    // Clear Cache (used for testing)
     public void ClearCache()
     {
         _cachedGeoForecasts.Clear();
     _cachedCityForecasts.Clear();
     Console.WriteLine("Cache cleared.");
     }
-
-
 
 }
 

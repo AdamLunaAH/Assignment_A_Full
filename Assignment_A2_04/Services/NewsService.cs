@@ -11,6 +11,7 @@ public class NewsService
     readonly string _endpoint = "https://api.bing.microsoft.com/v7.0/news";
     readonly HttpClient _httpClient = new HttpClient();
 
+    // ConcurrentDictionaries to store the cached news
     readonly ConcurrentDictionary<NewsCategory, (NewsResponse newsResponse, DateTime timestamp)> _cachedNews =
         new ConcurrentDictionary<NewsCategory, (NewsResponse, DateTime)>();
 
@@ -24,13 +25,14 @@ public class NewsService
         LoadCacheFromXML();
     }
 
-    //Event declaration
+    // Event for when the news is available
     public event EventHandler<string> NewsAvailable;
     protected virtual void OnNewsAvailable(string message)
     {
         NewsAvailable?.Invoke(this, message);
     }
 
+    // Get the news for a category
     public async Task<NewsResponse> GetNewsAsync(NewsCategory category)
     {
 
@@ -44,7 +46,7 @@ public class NewsService
                 OnNewsAvailable($"News for {category} is available from cache.");
                 return cachedData.newsResponse;
             }
-            // If the cache is expired, clear it and fetch new data
+            // If the cache is expired, clear it
             _cachedNews.TryRemove(category, out _);
         }
 
@@ -63,16 +65,14 @@ public class NewsService
         newsResponse.Category = category;
 
 
-        //// Cache the new data with the current timestamp
+        // Cache the new data with the current timestamp
         _cachedNews[category] = (newsResponse, DateTime.Now);
-        ///* Used for testing the cache expiration check (Removes 10 minutes from the cache timestamp to always make it to old).
-        //This is faster than using a long pause between the Tasks */
-        ////_cachedNews[category] = (newsResponse, DateTime.Now.AddMinutes(-10));
 
+        // Save the cache to an XML file
         SaveCacheToXML(category, newsResponse);
 
 
-        // Message that the mews is not from cache (from the Bing server).
+        // Message that the news is not from cache (from the Bing server).
         OnNewsAvailable($"News for {category} is available from server. ");
 
         return newsResponse;
@@ -87,6 +87,7 @@ public class NewsService
             NewsResponse.Serialize(newsResponse, key.FileName);
             Console.WriteLine($"Cache for {category} saved to: {key.FileName}");
         }
+        // Catch any exceptions that occur during the cache save
         catch (Exception ex)
         {
             Console.WriteLine($"Failed to save cache for {category}: {ex.Message}");
@@ -96,7 +97,6 @@ public class NewsService
     // Load the cache from the XML file
     private void LoadCacheFromXML()
     {
-        //var cacheDirectory = Path.GetDirectoryName(NewsCacheKey.fname("dummy.xml"));
 
         // Get the cache directory from NewsCacheKey.cs
         var cacheDirectory = NewsCacheKey.GetCacheDirectory();
@@ -135,7 +135,7 @@ public class NewsService
 
                 // Check if the cache is too old (e.g., older than 1 minute)
                 if ((DateTime.Now - fileInfo.LastWriteTime).TotalMinutes > 1)
-                // Changed to seconds for testing
+                // Changed to seconds (for testing)
                 //if ((DateTime.Now - fileInfo.LastWriteTime).TotalSeconds > 1)
                 {
                     // Shows the cache file is too old and will be deleted
@@ -149,6 +149,7 @@ public class NewsService
                 _cachedNews[category] = (newsResponse, fileInfo.LastWriteTime);
                 Console.WriteLine($"Loaded cache for {category} from: {file}");
             }
+            // Catch any exceptions that occur during the cache load
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to load cache file: {file}, Error: {ex.Message}");
