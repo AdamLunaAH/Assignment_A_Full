@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "A1_Weather_Assignment", "Assignment_A1_03\A1_Weather_Assignment.csproj", "{5F78AFEB-5C38-4002-A377-7186698C8A15}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "A1_Weather_Assignment", "A1_Weather_Assignment\A1_Weather_Assignment.csproj", "{5F78AFEB-5C38-4002-A377-7186698C8A15}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "A2_News_Assignment", "Assignment_A2_04\A2_News_Assignment.csproj", "{14B06018-FF7A-4815-9916-FDC540348BDB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "A2_News_Assignment", "A2_News_Assignment\A2_News_Assignment.csproj", "{14B06018-FF7A-4815-9916-FDC540348BDB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
