@@ -1,7 +1,7 @@
 using System.Xml.Serialization;
 using Newtonsoft.Json;
 
-namespace Assignment_A2_04.Models;
+namespace A2_News_Assignment.Models;
 
 public enum NewsCategory { Business, Entertainment, Technology, Sports, World };
 

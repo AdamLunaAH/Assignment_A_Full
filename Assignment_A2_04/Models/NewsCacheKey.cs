@@ -1,4 +1,4 @@
-namespace Assignment_A2_04.Models;
+namespace A2_News_Assignment.Models;
 
 public class NewsCacheKey
 {

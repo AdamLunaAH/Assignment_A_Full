@@ -1,9 +1,9 @@
 ﻿using System.Collections.Concurrent;
 using Newtonsoft.Json;
 
-using Assignment_A1_03.Models;
+using A1_Weather_Assignment.Models;
 
-namespace Assignment_A1_03.Services;
+namespace A1_Weather_Assignment.Services;
 
 public class OpenWeatherService
 {
