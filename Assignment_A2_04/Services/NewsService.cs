@@ -1,10 +1,10 @@
 ﻿using System.Net;
 using Newtonsoft.Json;
 
-using Assignment_A2_04.Models;
+using A2_News_Assignment.Models;
 using System.Collections.Concurrent;
 
-namespace Assignment_A2_04.Services;
+namespace A2_News_Assignment.Services;
 public class NewsService
 {
     readonly string _subscriptionKey = "256970bad92b4d5398613d17fcba4a7f";

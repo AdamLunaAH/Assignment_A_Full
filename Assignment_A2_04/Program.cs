@@ -1,7 +1,7 @@
-﻿using Assignment_A2_04.Models;
-using Assignment_A2_04.Services;
+﻿using A2_News_Assignment.Models;
+using A2_News_Assignment.Services;
 
-namespace Assignment_A2_04;
+namespace A2_News_Assignment;
 
 class Program
 {

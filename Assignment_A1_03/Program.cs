@@ -1,7 +1,7 @@
-﻿using Assignment_A1_03.Models;
-using Assignment_A1_03.Services;
+﻿using A1_Weather_Assignment.Models;
+using A1_Weather_Assignment.Services;
 
-namespace Assignment_A1_03;
+namespace A1_Weather_Assignment;
 
 class Program
 {

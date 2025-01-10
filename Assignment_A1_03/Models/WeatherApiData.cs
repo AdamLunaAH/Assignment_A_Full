@@ -1,4 +1,4 @@
-﻿namespace Assignment_A1_03.Models;
+﻿namespace A1_Weather_Assignment.Models;
 
 public class Main
 {
